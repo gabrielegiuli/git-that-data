@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import { ComposedChart, Bar, Legend, XAxis, YAxis, Tooltip, Line } from 'recharts';
+import { useState, useCallback } from 'react'
 import axios from 'axios'
 import './App.css'
 
@@ -7,8 +8,8 @@ const DEFAULT_MAX_REQUEST = 20;
 
 function EmailTable(props) {
   return (
-    <div className="overflow-x-auto">
-      <table className="table w-full">
+    <div className="table-wrp block max-h-96">
+      <table className="table table-zebra w-full">
         <thead>
           <tr>
             <th></th>
@@ -16,9 +17,9 @@ function EmailTable(props) {
             <th>Email</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="h-96 overflow-y-auto">
           {props.list.map((element, i) =>
-            <EmailRow element={element} key={i} number={i + 1} />
+            <EmailRow element={element} key={i} number={i + 1} handle={props.handle} />
           )}
         </tbody>
       </table>
@@ -29,10 +30,77 @@ function EmailTable(props) {
 function EmailRow(props) {
   return (
     <tr>
-      <th>{props.number}</th>
+      <th>
+        <label>
+          <input type="checkbox" className="checkbox" onChange={evt => props.handle(evt.target.checked, props.element.email)} />
+        </label>
+      </th>
       <th>{props.element.name}</th>
       <td>{props.element.email}</td>
     </tr>
+  )
+}
+
+function BarGraph({ data, authEmails }) {
+
+  const processed_commits = []
+  for (const commit of data) {
+    var element = commit.commit.committer
+    var date = element.date.substring(0, getPosition(element.date, 'T', 1))
+    var month = element.date.substring(0, getPosition(element.date, '-', 2))
+    var day = date.substring(getPosition(date, '-', 2) + 1, date.length)
+
+    var week = Math.floor(day / 7) + 1
+    if (week >= 5) {
+      week = 4
+    }
+    var stamp = month + 'W' + week;
+
+    var new_commit = { email: commit.commit.author.email, stamp: stamp }
+    processed_commits.push(new_commit)
+  }
+
+  var grouped_commits = groupBy(processed_commits, 'stamp')
+  var out_data = []
+
+  for (stamp in grouped_commits) {
+    var auth = 0
+    var non_auth = 0
+    var count = grouped_commits[stamp].length
+
+    for (var commit of grouped_commits[stamp]) {
+      if (authEmails.indexOf(commit.email) == -1) {
+        non_auth++
+      } else {
+        auth++
+      }
+    }
+
+    var new_out = { stamp: stamp, non_auth: non_auth, auth: auth, count: count }
+    out_data.push(new_out)
+    out_data.sort((a, b) => (a.stamp > b.stamp) ? 1 : -1)
+
+  }
+
+  const cumulative = []
+  var prev = 0
+  out_data.map(commit => {
+    prev += commit.count
+    cumulative.push({ Total: prev, stamp: commit.stamp, Authors: commit.auth, NonAuthors: commit.non_auth })
+    console.log()
+  })
+
+  return (
+    <ComposedChart width={850} height={400} data={cumulative}>
+      <XAxis dataKey="stamp" />
+      <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="left" />
+      <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="right" orientation="right" />
+      <Bar type="monotone" dataKey="Authors" barSize={30} fill="#8884d8" yAxisId="left" stackId="a"/>
+      <Bar type="monotone" dataKey="NonAuthors" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a"/>
+      <Line type="monotone" dataKey="Total" yAxisId="right" />
+      <Legend/>
+      <Tooltip/>
+    </ComposedChart>
   )
 }
 
@@ -48,6 +116,17 @@ function range(from, to) {
     r.push(i);
   }
   return r;
+}
+
+function groupBy(xs, key) {
+  return xs.reduce(function (rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
+function getPosition(string, subString, index) {
+  return string.split(subString, index).join(subString).length;
 }
 
 function getCommitsPage(repo, token, page) {
@@ -102,7 +181,7 @@ async function getCommits(repo, maxRequestAmount, token) {
       return getCommitsPage(repo, token, page);
     })
   );
-  
+
   const commits = []
   resArray.map(res => {
     const { data } = res;
@@ -115,23 +194,37 @@ async function getCommits(repo, maxRequestAmount, token) {
 export default function App() {
 
   const [list, setList] = useState([])
+  const [commits, setCommits] = useState([])
   const [name, setName] = useState("")
+  const [authEmails, setAuthEmails] = useState([])
+
+  const updateSelected = (newState, email) => {
+    var new_emails = [...authEmails]
+    if (!newState) {
+      new_emails = authEmails.filter(x => x !== email);
+    } else {
+      new_emails.push(email)
+    }
+    console.log(new_emails)
+    setAuthEmails(new_emails)
+  }
 
   const updateCommitters = (result) => {
     const new_list = []
-      result.map(element => {
-        const new_author = {name: element.commit.author.name, email: element.commit.author.email}
-        new_list.push(new_author)
-      })
-      setList(removeDuplicates(new_list, 'email'))
+    result.map(element => {
+      const new_author = { name: element.commit.author.name, email: element.commit.author.email }
+      new_list.push(new_author)
+    })
+    setList(removeDuplicates(new_list, 'email'))
   }
 
   const updateData = () => {
     getCommits(name, DEFAULT_MAX_REQUEST)
-    .then(result => {
-      updateCommitters(result)
-    })
-    .catch(error => alert("An error has occurred, please check the name and try again"))
+      .then(result => {
+        updateCommitters(result)
+        setCommits(result)
+      })
+      .catch(error => alert("An error has occurred, please check the name and try again"))
   }
 
   return (
@@ -144,7 +237,8 @@ export default function App() {
           <button className="btn btn-primary" onClick={updateData}>Button</button>
         </div>
       </div>
-      <EmailTable list={list} />
+      <BarGraph data={commits} authEmails={authEmails} />
+      <EmailTable list={list} handle={updateSelected} />
     </div>
   )
 }
