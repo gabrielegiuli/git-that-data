@@ -91,7 +91,7 @@ function BarGraph({ data, authEmails }) {
   })
 
   return (
-    <ComposedChart width={850} height={400} data={cumulative} className='recharts-wrapper'>
+    <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
       <XAxis dataKey="stamp" />
       <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="left" />
       <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="right" orientation="right" />
@@ -197,6 +197,7 @@ export default function App() {
   const [commits, setCommits] = useState([])
   const [name, setName] = useState("")
   const [authEmails, setAuthEmails] = useState([])
+  const [isBlank, setIsBlank] = useState(true)
 
   const updateSelected = (newState, email) => {
     var new_emails = [...authEmails]
@@ -224,24 +225,38 @@ export default function App() {
       .then(result => {
         updateCommitters(result)
         setCommits(result)
+        setIsBlank(false)
       })
       .catch(error => alert("An error has occurred, please check the name and try again"))
   }
 
-  return (
-    <div>
+  if (isBlank) {
+    return (
       <div className="form-control">
         <div className="input-group">
-          <input type="text" placeholder="Search…" className="input input-bordered" value={name} onChange={evt => setName(evt.target.value)}/>
-          <button className="btn btn-square"  onClick={updateData}>
+          <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+          <button className="btn btn-square" onClick={updateData}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </button>
         </div>
       </div>
-      <div className='recharts-container'>
-        <BarGraph data={commits} authEmails={authEmails} />
+    )
+  } else {
+    return (
+      <div>
+        <div className="form-control">
+          <div className="input-group">
+            <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+            <button className="btn btn-square" onClick={updateData}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </button>
+          </div>
+        </div>
+        <div className='recharts-container'>
+          <BarGraph data={commits} authEmails={authEmails} />
+        </div>
+        <EmailTable list={list} handle={updateSelected} />
       </div>
-      <EmailTable list={list} handle={updateSelected} />
-    </div>
-  )
+    )
+  }
 }
