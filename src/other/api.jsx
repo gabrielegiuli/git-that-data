@@ -80,5 +80,5 @@ function getIssuesPage(repo, token, page) {
     });
 }
 
-export const getCommits = async (repo, maxRequestAmount, token) =>  structuredRequest(repo, maxRequestAmount, token, getCommitsPage)
-export const getIssues = async (repo, maxRequestAmount, token) =>  structuredRequest(repo, maxRequestAmount, token, getIssuesPage)
+export const getCommits = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getCommitsPage)
+export const getIssues = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getIssuesPage)
