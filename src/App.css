@@ -14,3 +14,13 @@
   float: left;
   padding: 10pt;
 }
+
+.table-wrp  {
+  max-height: 75vh;
+  overflow-y: auto;
+  display:block;
+}
+thead{
+  position:sticky;
+  top:0
+}
