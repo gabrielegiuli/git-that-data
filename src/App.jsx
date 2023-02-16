@@ -94,7 +94,7 @@ function BarGraph({ data, authEmails }) {
     <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
       <XAxis dataKey="stamp" />
       <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="left" />
-      <YAxis label={{ value: 'New Commits', angle: -90, position: 'insideLeft' }} yAxisId="right" orientation="right" />
+      <YAxis yAxisId="right" orientation="right" />
       <Bar type="monotone" dataKey="Authors" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a" />
       <Bar type="monotone" dataKey="NonAuthors" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
       <Line type="monotone" dataKey="Total" yAxisId="right" />
