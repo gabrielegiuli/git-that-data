@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { removeDuplicates } from './other/utils';
-import getCommits from './other/api';
+import { getCommits, getIssues } from './other/api';
 import CommitsGraph from './components/graphs';
 import EmailTable from './components/table';
 import './App.css'
@@ -44,6 +44,10 @@ export default function App() {
         setIsBlank(false)
       })
       .catch(error => alert("An error has occurred, please check the name and try again"))
+    getIssues(name, DEFAULT_MAX_REQUEST)
+      .then(result => {
+        console.log(result[1])
+      })
   }
 
   if (isBlank) {
