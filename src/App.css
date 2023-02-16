@@ -5,11 +5,6 @@
   text-align: center;
 }
 
-.search {
-  overflow: hidden;
-  padding: 30pt;
-}
-
 .component {
   float: left;
   padding: 10pt;
@@ -23,4 +18,12 @@
 thead{
   position:sticky;
   top:0
+}
+
+.recharts-wrapper {
+  margin : 0 auto;
+}
+
+.recharts-container {
+  padding: 30px;
 }
