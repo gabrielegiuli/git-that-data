@@ -14,7 +14,7 @@ function CustomToolbar() {
   );
 }
 
-export default function EmailTable({ list, handle }) {
+export default function EmailTable({ list, handle, loading }) {
 
   const rows = list.map((committer, index) => {
     return {
@@ -37,6 +37,7 @@ export default function EmailTable({ list, handle }) {
         components={{
           Toolbar: CustomToolbar,
         }}
+        loading={loading}
       />
     </Box>
   )

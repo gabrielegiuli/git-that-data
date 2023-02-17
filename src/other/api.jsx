@@ -119,7 +119,12 @@ function getIssuesPage(repo, token, page) {
     })
 }
 
-export const getPullRequests = async (repo, maxRequestAmount, token) => {
+export const getPullRequests = async (repo, maxRequestAmount, aggregateSize, token) => {
+    
+    if (!aggregateSize) {
+        return structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
+    }
+
     const array = await structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
     const out_array = await Promise.all(
         array.map(async (element) => {

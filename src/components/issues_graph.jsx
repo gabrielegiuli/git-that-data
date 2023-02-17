@@ -1,5 +1,6 @@
 import { ComposedChart, Bar, Legend, XAxis, YAxis, Tooltip, Line } from 'recharts';
 import { groupBy, getPosition } from '../other/utils';
+import { CircularProgress } from '@mui/material';
 
 function processData(data) {
     const processed_issues = []
@@ -48,18 +49,39 @@ function processData(data) {
     return cumulative
 }
 
-export default function IssuesGraph({ data }) {
+export default function IssuesGraph({ data, loading }) {
     const cumulative = processData(data)
-    return (
-        <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
-            <XAxis dataKey="stamp" />
-            <YAxis label={{ value: 'New Issues', angle: -90, position: 'insideLeft' }} yAxisId="left" />
-            <YAxis yAxisId="right" orientation="right" />
-            <Bar type="monotone" dataKey="Open" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a" />
-            <Bar type="monotone" dataKey="Closed" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
-            <Line type="monotone" dataKey="Total" yAxisId="right" />
-            <Legend />
-            <Tooltip />
-        </ComposedChart>
-    )
+    if (loading) {
+        return (
+            <div className='outer'>
+                <div className='blurr below'>
+                    <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
+                        <XAxis dataKey="stamp" />
+                        <YAxis label={{ value: 'New Issues', angle: -90, position: 'insideLeft' }} yAxisId="left" />
+                        <YAxis yAxisId="right" orientation="right" />
+                        <Bar type="monotone" dataKey="Open" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a" />
+                        <Bar type="monotone" dataKey="Closed" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
+                        <Line type="monotone" dataKey="Total" yAxisId="right" />
+                        <Legend />
+                    </ComposedChart>
+                </div>
+                <div className='top'>
+                    <CircularProgress size="7rem" />
+                </div>
+            </div>
+        )
+    } else {
+        return (
+            <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
+                <XAxis dataKey="stamp" />
+                <YAxis label={{ value: 'New Issues', angle: -90, position: 'insideLeft' }} yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Bar type="monotone" dataKey="Open" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a" />
+                <Bar type="monotone" dataKey="Closed" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
+                <Line type="monotone" dataKey="Total" yAxisId="right" />
+                <Legend />
+                <Tooltip />
+            </ComposedChart>
+        )
+    }
 }
