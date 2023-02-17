@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { token } from '../auth/github_credentials'; 
 import { removeDuplicates } from './other/utils';
-import { getCommits, getIssues } from './other/api';
+import { getCommits, getIssues, getPullRequests } from './other/api';
 import CommitsGraph from './components/commits_graph';
 import IssuesGraph from './components/issues_graph';
 import EmailTable from './components/table';
@@ -18,6 +18,7 @@ const darkTheme = createTheme({
 
 export default function App() {
 
+  const [pullRequests, setPullRequests] = useState([])
   const [issues, setIssues] = useState([])
   const [list, setList] = useState([])
   const [commits, setCommits] = useState([])
@@ -43,6 +44,15 @@ export default function App() {
 
   const updateData = () => {
     setAuthEmails([])
+    getIssues(name, DEFAULT_MAX_REQUEST, token)
+    .then(result => {
+      setIssues(result)
+    })
+    .catch(error => alert("An error has occurred, please check the name and try again"))
+    getPullRequests(name, DEFAULT_MAX_REQUEST, token)
+    .then(result => {
+      setPullRequests(result)
+    })
     getCommits(name, DEFAULT_MAX_REQUEST, token)
       .then(result => {
         updateCommitters(result)
@@ -50,10 +60,6 @@ export default function App() {
         setIsBlank(false)
       })
       .catch(error => alert("An error has occurred, please check the name and try again"))
-    getIssues(name, DEFAULT_MAX_REQUEST, token)
-      .then(result => {
-        setIssues(result)
-      })
   }
 
   if (isBlank) {
@@ -82,8 +88,8 @@ export default function App() {
             </div>
           </div>
           <div className='recharts-container'>
-            <CommitsGraph data={commits} authEmails={authEmails} />
             <IssuesGraph data={issues}/>
+            <CommitsGraph data={commits} authEmails={authEmails} />
           </div>
           <EmailTable list={list} handle={updateSelected} />
         </div>
