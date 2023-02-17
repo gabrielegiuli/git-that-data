@@ -26,7 +26,7 @@ export default function App() {
   const [name, setName] = useState("")
   const [authEmails, setAuthEmails] = useState([])
   const [isBlank, setIsBlank] = useState(true)
-  const [recordSize, setRecordSize] = useState(false)
+  const [recordSize, setRecordSize] = useState(true)
 
   const [isTableLoading, setIsTableLoading] = useState(true)
   const [isPRLoading, setIsPRLoading] = useState(true)
@@ -125,7 +125,7 @@ export default function App() {
           </div>
         </div>
           <div className='recharts-container'>
-            <PRGraph data={pullRequests} loading={isPRLoading}/>
+            <PRGraph data={pullRequests} loading={isPRLoading} isAggregated={recordSize}/>
             <IssuesGraph data={issues} loading={isIssuesLoading}/>
             <CommitsGraph data={commits} authEmails={authEmails} loading={isCommitsLoading}/>
           </div>

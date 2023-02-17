@@ -62,33 +62,10 @@ function processData(data) {
     return cumulative
 }
 
-export default function PRGraph({ data, loading }) {
-    const cumulative = processData(data)
-    if (loading) {
+function Graph({ data, isAggregated }) {
+    if (isAggregated) {
         return (
-            <div className='outer'>
-                <div className='blurr below'>
-                    <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
-                        <XAxis dataKey="stamp" />
-                        <YAxis label={{ value: 'New Pull Requests', angle: -90, position: 'insideLeft' }} yAxisId="left" />
-                        <YAxis yAxisId="right" orientation="right" />
-                        <Bar type="monotone" dataKey="M" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
-                        <Bar type="monotone" dataKey="L" barSize={30} fill="#82ca9d" yAxisId="left" stackId="a" />
-                        <Bar type="monotone" dataKey="XL" barSize={30} fill="#ffc658" yAxisId="left" stackId="a" />
-                        <Bar type="monotone" dataKey="XXL" barSize={30} fill="#5F9EA0" yAxisId="left" stackId="a" />
-                        <Line type="monotone" dataKey="Total" yAxisId="right" />
-                        <Legend />
-                    </ComposedChart>
-                </div>
-                <div className='top'>
-                        <CircularProgress size="7rem"/>
-                </div>
-            </div>
-
-        )
-    } else {
-        return (
-            <ComposedChart width={900} height={500} data={cumulative} className='recharts-wrapper'>
+            <ComposedChart width={900} height={500} data={data} className='recharts-wrapper'>
                 <XAxis dataKey="stamp" />
                 <YAxis label={{ value: 'New Pull Requests', angle: -90, position: 'insideLeft' }} yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
@@ -98,8 +75,39 @@ export default function PRGraph({ data, loading }) {
                 <Bar type="monotone" dataKey="XXL" barSize={30} fill="#5F9EA0" yAxisId="left" stackId="a" />
                 <Line type="monotone" dataKey="Total" yAxisId="right" />
                 <Legend />
-                <Tooltip />
             </ComposedChart>
+        )
+    } else {
+        return (
+            <ComposedChart width={900} height={500} data={data} className='recharts-wrapper'>
+                <XAxis dataKey="stamp" />
+                <YAxis label={{ value: 'New Pull Requests', angle: -90, position: 'insideLeft' }} yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Bar type="monotone" dataKey="Count" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
+                <Line type="monotone" dataKey="Total" yAxisId="right" />
+                <Legend />
+            </ComposedChart>
+        )
+    }
+}
+
+export default function PRGraph({ data, loading, isAggregated }) {
+    const cumulative = processData(data)
+    if (loading) {
+        return (
+            <div className='outer'>
+                <div className='blurr below'>
+                    <Graph data={cumulative} isAggregated={isAggregated} />
+                </div>
+                <div className='top'>
+                    <CircularProgress size="7rem" />
+                </div>
+            </div>
+
+        )
+    } else {
+        return (
+            <Graph data={cumulative} isAggregated={isAggregated} />
         )
     }
 }
