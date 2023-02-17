@@ -52,6 +52,7 @@ export default function App() {
     getPullRequests(name, DEFAULT_MAX_REQUEST, token)
     .then(result => {
       setPullRequests(result)
+      console.log(pullRequests)
     })
     getCommits(name, DEFAULT_MAX_REQUEST, token)
       .then(result => {

@@ -39,7 +39,7 @@ async function structuredRequest(repo, maxRequestAmount, token, requestFunction)
         requestPages.map((page) => {
             return requestFunction(repo, token, page);
         })
-    );
+    )
 
     const out = []
     resArray.map(res => {
@@ -50,8 +50,32 @@ async function structuredRequest(repo, maxRequestAmount, token, requestFunction)
     return out
 }
 
+async function getPullRequestSize(repo, token, number) {
+    let url = `https://api.github.com/repos/${repo}/pulls/${number}`
+
+    const result = await axios.get(url, {
+        headers: {
+            Accept: "application/vnd.github.v3.star+json",
+            Authorization: token ? `token ${token}` : "",
+        },
+    })
+
+    const total = result.data.additions + result.data.deletions
+
+    if (total < 100) {
+        return "m"
+    } else if (total < 500) {
+        return "l"
+    } else if (total < 1000) {
+        return "xl"
+    } else {
+        return "xxl"
+    }
+
+}
+
 function getPullRequestsPage(repo, token, page) {
-    let url = `https://api.github.com/repos/${repo}/pulls?per_page=${DEFAULT_PER_PAGE}`;
+    let url = `https://api.github.com/repos/${repo}/pulls?per_page=${DEFAULT_PER_PAGE}&state=all`
 
     if (page !== undefined) {
         url = `${url}&page=${page}`;
@@ -62,11 +86,11 @@ function getPullRequestsPage(repo, token, page) {
             Accept: "application/vnd.github.v3.star+json",
             Authorization: token ? `token ${token}` : "",
         },
-    });
+    })
 }
 
 function getCommitsPage(repo, token, page) {
-    let url = `https://api.github.com/repos/${repo}/commits?per_page=${DEFAULT_PER_PAGE}`;
+    let url = `https://api.github.com/repos/${repo}/commits?per_page=${DEFAULT_PER_PAGE}`
 
     if (page !== undefined) {
         url = `${url}&page=${page}`;
@@ -77,11 +101,11 @@ function getCommitsPage(repo, token, page) {
             Accept: "application/vnd.github.v3.star+json",
             Authorization: token ? `token ${token}` : "",
         },
-    });
+    })
 }
 
 function getIssuesPage(repo, token, page) {
-    let url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=${DEFAULT_PER_PAGE}`;
+    let url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=${DEFAULT_PER_PAGE}`
 
     if (page !== undefined) {
         url = `${url}&page=${page}`;
@@ -92,9 +116,19 @@ function getIssuesPage(repo, token, page) {
             Accept: "application/vnd.github.v3.star+json",
             Authorization: token ? `token ${token}` : "",
         },
-    });
+    })
 }
 
-export const getPullRequests = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
+export const getPullRequests = async (repo, maxRequestAmount, token) => {
+    const array = await structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
+    const out_array = await Promise.all(
+        array.map(async (element) => {
+            element.size = await getPullRequestSize(repo, token, element.number)
+            return element
+        })
+    )
+    return out_array
+}
+
 export const getCommits = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getCommitsPage)
 export const getIssues = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getIssuesPage)
