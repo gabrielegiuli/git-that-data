@@ -1,34 +1,32 @@
-export default function EmailTable(props) {
-    return (
-      <div className="table-wrp block max-h-96">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody className="h-96 overflow-y-auto">
-            {props.list.map((element, i) =>
-              <EmailRow element={element} key={i} number={i + 1} handle={props.handle} />
-            )}
-          </tbody>
-        </table>
-      </div>
-    )
-  }
-  
-  function EmailRow(props) {
-    return (
-      <tr>
-        <th>
-          <label>
-            <input type="checkbox" className="checkbox" onChange={evt => props.handle(evt.target.checked, props.element.email)} />
-          </label>
-        </th>
-        <th>{props.element.name}</th>
-        <td>{props.element.email}</td>
-      </tr>
-    )
-  }
+import Box from '@mui/material/Box';
+import { DataGrid } from '@mui/x-data-grid';
+
+const columns = [
+  { field: 'name', headerName: 'Name', width: 300 },
+  { field: 'email', headerName: 'Email', width: 300 },
+];
+
+export default function EmailTable({ list, handle }) {
+
+  const rows = list.map((committer, index) => {
+    return {
+      name: committer.name, 
+      email: committer.email,
+      id: index
+    }
+  })
+
+  return (
+    <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        checkboxSelection
+        disableSelectionOnClick
+        onSelectionModelChange={(ids) => handle(ids)}
+      />
+    </Box>
+  )
+}

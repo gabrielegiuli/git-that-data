@@ -3,9 +3,17 @@ import { removeDuplicates } from './other/utils';
 import { getCommits, getIssues } from './other/api';
 import CommitsGraph from './components/graphs';
 import EmailTable from './components/table';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import './App.css'
 
 const DEFAULT_MAX_REQUEST = 20;
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 export default function App() {
 
@@ -15,15 +23,11 @@ export default function App() {
   const [authEmails, setAuthEmails] = useState([])
   const [isBlank, setIsBlank] = useState(true)
 
-  const updateSelected = (newState, email) => {
-    var new_emails = [...authEmails]
-    if (!newState) {
-      new_emails = authEmails.filter(x => x !== email);
-    } else {
-      new_emails.push(email)
-    }
-    console.log(new_emails)
-    setAuthEmails(new_emails)
+  const updateSelected = (ids) => {
+    const selectedNames = ids.map((id) => {
+      return list[id].email
+    })
+    setAuthEmails(selectedNames)
   }
 
   const updateCommitters = (result) => {
@@ -52,18 +56,7 @@ export default function App() {
 
   if (isBlank) {
     return (
-      <div className="form-control">
-        <div className="input-group">
-          <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
-          <button className="btn btn-square" onClick={updateData}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          </button>
-        </div>
-      </div>
-    )
-  } else {
-    return (
-      <div>
+      <ThemeProvider theme={darkTheme}>
         <div className="form-control">
           <div className="input-group">
             <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
@@ -72,11 +65,26 @@ export default function App() {
             </button>
           </div>
         </div>
-        <div className='recharts-container'>
-          <CommitsGraph data={commits} authEmails={authEmails} />
+      </ThemeProvider>
+    )
+  } else {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <div>
+          <div className="form-control">
+            <div className="input-group">
+              <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+              <button className="btn btn-square" onClick={updateData}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </button>
+            </div>
+          </div>
+          <div className='recharts-container'>
+            <CommitsGraph data={commits} authEmails={authEmails} />
+          </div>
+          <EmailTable list={list} handle={updateSelected} />
         </div>
-        <EmailTable list={list} handle={updateSelected} />
-      </div>
+      </ThemeProvider>
     )
   }
 }
