@@ -43,7 +43,7 @@ function processData(data) {
     var prev = 0
     out_data.map(issue => {
         prev += issue.count
-        cumulative.push({ Total: prev, Open: issue.open, Closed: issue.closed })
+        cumulative.push({ Total: prev, Open: issue.open, Closed: issue.closed, stamp: issue.stamp })
     })
     return cumulative
 }

@@ -1,10 +1,18 @@
 import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbarContainer, GridToolbarExport} from '@mui/x-data-grid';
 
 const columns = [
   { field: 'name', headerName: 'Name', width: 300 },
   { field: 'email', headerName: 'Email', width: 300 },
 ];
+
+function CustomToolbar() {
+  return (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+    </GridToolbarContainer>
+  );
+}
 
 export default function EmailTable({ list, handle }) {
 
@@ -26,6 +34,9 @@ export default function EmailTable({ list, handle }) {
         checkboxSelection
         disableSelectionOnClick
         onSelectionModelChange={(ids) => handle(ids)}
+        components={{
+          Toolbar: CustomToolbar,
+        }}
       />
     </Box>
   )

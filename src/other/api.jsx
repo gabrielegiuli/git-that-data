@@ -50,6 +50,21 @@ async function structuredRequest(repo, maxRequestAmount, token, requestFunction)
     return out
 }
 
+function getPullRequestsPage(repo, token, page) {
+    let url = `https://api.github.com/repos/${repo}/pulls?per_page=${DEFAULT_PER_PAGE}`;
+
+    if (page !== undefined) {
+        url = `${url}&page=${page}`;
+    }
+
+    return axios.get(url, {
+        headers: {
+            Accept: "application/vnd.github.v3.star+json",
+            Authorization: token ? `token ${token}` : "",
+        },
+    });
+}
+
 function getCommitsPage(repo, token, page) {
     let url = `https://api.github.com/repos/${repo}/commits?per_page=${DEFAULT_PER_PAGE}`;
 
@@ -80,5 +95,6 @@ function getIssuesPage(repo, token, page) {
     });
 }
 
+export const getPullRequests = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
 export const getCommits = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getCommitsPage)
 export const getIssues = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getIssuesPage)
