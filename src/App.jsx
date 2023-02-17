@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { token } from '../auth/github_credentials'; 
 import { removeDuplicates } from './other/utils';
 import { getCommits, getIssues } from './other/api';
-import CommitsGraph from './components/graphs';
+import CommitsGraph from './components/commits_graph';
+import IssuesGraph from './components/issues_graph';
 import EmailTable from './components/table';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import './App.css'
 
 const DEFAULT_MAX_REQUEST = 20;
@@ -17,6 +18,7 @@ const darkTheme = createTheme({
 
 export default function App() {
 
+  const [issues, setIssues] = useState([])
   const [list, setList] = useState([])
   const [commits, setCommits] = useState([])
   const [name, setName] = useState("")
@@ -41,16 +43,16 @@ export default function App() {
 
   const updateData = () => {
     setAuthEmails([])
-    getCommits(name, DEFAULT_MAX_REQUEST)
+    getCommits(name, DEFAULT_MAX_REQUEST, token)
       .then(result => {
         updateCommitters(result)
         setCommits(result)
         setIsBlank(false)
       })
       .catch(error => alert("An error has occurred, please check the name and try again"))
-    getIssues(name, DEFAULT_MAX_REQUEST)
+    getIssues(name, DEFAULT_MAX_REQUEST, token)
       .then(result => {
-        console.log(result[1])
+        setIssues(result)
       })
   }
 
@@ -81,6 +83,7 @@ export default function App() {
           </div>
           <div className='recharts-container'>
             <CommitsGraph data={commits} authEmails={authEmails} />
+            <IssuesGraph data={issues}/>
           </div>
           <EmailTable list={list} handle={updateSelected} />
         </div>
