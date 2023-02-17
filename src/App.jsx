@@ -26,7 +26,7 @@ export default function App() {
   const [name, setName] = useState("")
   const [authEmails, setAuthEmails] = useState([])
   const [isBlank, setIsBlank] = useState(true)
-  const [recordSize, setRecordSize] = useState(true)
+  const [recordSize, setRecordSize] = useState(false)
 
   const [isTableLoading, setIsTableLoading] = useState(true)
   const [isPRLoading, setIsPRLoading] = useState(true)

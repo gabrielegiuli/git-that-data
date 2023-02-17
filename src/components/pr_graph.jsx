@@ -48,7 +48,7 @@ function processData(data) {
             }
         }
 
-        var new_out = { stamp: date, count: count, m: m, l: l, xl: xl, xxl: xxl, closed_number: closed_number }
+        var new_out = { stamp: stamp, count: count, m: m, l: l, xl: xl, xxl: xxl }
         out_data.push(new_out)
     }
     out_data.sort((a, b) => (a.stamp > b.stamp) ? 1 : -1)
