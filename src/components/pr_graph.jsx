@@ -62,7 +62,7 @@ function processData(data) {
     return cumulative
 }
 
-function Graph({ data, isAggregated }) {
+function Graph({ data, isAggregated, enableTooltip }) {
     if (isAggregated) {
         return (
             <ComposedChart width={900} height={500} data={data} className='recharts-wrapper'>
@@ -74,6 +74,9 @@ function Graph({ data, isAggregated }) {
                 <Bar type="monotone" dataKey="XL" barSize={30} fill="#ffc658" yAxisId="left" stackId="a" />
                 <Bar type="monotone" dataKey="XXL" barSize={30} fill="#5F9EA0" yAxisId="left" stackId="a" />
                 <Line type="monotone" dataKey="Total" yAxisId="right" />
+                { enableTooltip && 
+                    <Tooltip />
+                }
                 <Legend />
             </ComposedChart>
         )
@@ -85,6 +88,9 @@ function Graph({ data, isAggregated }) {
                 <YAxis yAxisId="right" orientation="right" />
                 <Bar type="monotone" dataKey="Count" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
                 <Line type="monotone" dataKey="Total" yAxisId="right" />
+                { enableTooltip && 
+                    <Tooltip />
+                }
                 <Legend />
             </ComposedChart>
         )
@@ -97,7 +103,7 @@ export default function PRGraph({ data, loading, isAggregated }) {
         return (
             <div className='outer'>
                 <div className='blurr below'>
-                    <Graph data={cumulative} isAggregated={isAggregated} />
+                    <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading}/>
                 </div>
                 <div className='top'>
                     <CircularProgress size="7rem" />
@@ -107,7 +113,7 @@ export default function PRGraph({ data, loading, isAggregated }) {
         )
     } else {
         return (
-            <Graph data={cumulative} isAggregated={isAggregated} />
+            <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading}/>
         )
     }
 }
