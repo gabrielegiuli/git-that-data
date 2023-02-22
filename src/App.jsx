@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { token } from '../auth/github_credentials';
 import { removeDuplicates } from './other/utils';
 import { getCommits, getIssues, getPullRequests } from './other/api';
 import CommitsGraph from './components/commits_graph';
@@ -27,16 +26,28 @@ export default function App() {
   const [authEmails, setAuthEmails] = useState([])
   const [isBlank, setIsBlank] = useState(true)
   const [recordSize, setRecordSize] = useState(false)
+  const [token, setToken] = useState(null)
 
   const [isTableLoading, setIsTableLoading] = useState(true)
   const [isPRLoading, setIsPRLoading] = useState(true)
   const [isIssuesLoading, setIsIssuesLoading] = useState(true)
   const [isCommitsLoading, setIsCommitsLoading] = useState(true)
 
-  useEffect(() => {setIsTableLoading(false)}, [list])
-  useEffect(() => {setIsPRLoading(false)}, [pullRequests])
-  useEffect(() => {setIsIssuesLoading(false)}, [issues])
-  useEffect(() => {setIsCommitsLoading(false)}, [commits])
+  useEffect(() => { setIsTableLoading(false) }, [list])
+  useEffect(() => { setIsPRLoading(false) }, [pullRequests])
+  useEffect(() => { setIsIssuesLoading(false) }, [issues])
+  useEffect(() => { setIsCommitsLoading(false) }, [commits])
+
+  useEffect(() => {
+    const ntoken = window.localStorage.getItem('token')
+    setToken(ntoken)
+  }, []);
+
+  useEffect(() => {
+    if (token != null) {
+      window.localStorage.setItem('token', token)
+    }
+  }, [token]);
 
   const setAllLoading = () => {
     setIsTableLoading(true)
@@ -88,7 +99,8 @@ export default function App() {
       <ThemeProvider theme={darkTheme}>
         <div className="form-control">
           <div className="input-group">
-            <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+            <input type="text" placeholder="Owner/Repo" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+            <input type="text" placeholder="GitHub Token" className="input input-bordered w-full" value={token != null ? token : ""} onChange={evt => setToken(evt.target.value)} />
             <button className="btn btn-square" onClick={updateData}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </button>
@@ -98,7 +110,7 @@ export default function App() {
           <div className="tooltip tooltip-bottom" data-tip="Limits API rate burn">
             <label className="label cursor-pointer">
               <span className="label-text">Aggregate PR Size</span>
-              <input type="checkbox" className="toggle" defaultChecked={recordSize} onChange={e => setRecordSize(e.target.checked)}/>
+              <input type="checkbox" className="toggle" defaultChecked={recordSize} onChange={e => setRecordSize(e.target.checked)} />
             </label>
           </div>
         </div>
@@ -111,25 +123,26 @@ export default function App() {
           <div className="form-control">
             <div className="input-group">
               <input type="text" placeholder="Search…" className="input input-bordered w-full" value={name} onChange={evt => setName(evt.target.value)} />
+              <input type="text" placeholder="Access Token (Optional)" className="input input-bordered w-full max-w-xs" value={token != null ? token : ""} onChange={evt => setToken(evt.target.value)} />
               <button className="btn btn-square" onClick={updateData}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
             </div>
           </div>
           <div className="form-control w-48 pt-2" >
-          <div className="tooltip tooltip-bottom" data-tip="Limits API rate burn">
-            <label className="label cursor-pointer">
-              <span className="label-text">Aggregate PR Size</span>
-              <input type="checkbox" className="toggle" defaultChecked={recordSize} onChange={e => setRecordSize(e.target.checked)}/>
-            </label>
+            <div className="tooltip tooltip-bottom" data-tip="Limits API rate burn">
+              <label className="label cursor-pointer">
+                <span className="label-text">Aggregate PR Size</span>
+                <input type="checkbox" className="toggle" defaultChecked={recordSize} onChange={e => setRecordSize(e.target.checked)} />
+              </label>
+            </div>
           </div>
-        </div>
           <div className='recharts-container'>
-            <PRGraph data={pullRequests} loading={isPRLoading} isAggregated={recordSize}/>
-            <IssuesGraph data={issues} loading={isIssuesLoading}/>
-            <CommitsGraph data={commits} authEmails={authEmails} loading={isCommitsLoading}/>
+            <PRGraph data={pullRequests} loading={isPRLoading} isAggregated={recordSize} />
+            <IssuesGraph data={issues} loading={isIssuesLoading} />
+            <CommitsGraph data={commits} authEmails={authEmails} loading={isCommitsLoading} />
           </div>
-          <EmailTable list={list} handle={updateSelected} loading={isTableLoading}/>
+          <EmailTable list={list} handle={updateSelected} loading={isTableLoading} />
         </div>
       </ThemeProvider>
     )
