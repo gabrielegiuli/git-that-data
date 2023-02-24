@@ -131,7 +131,7 @@ export const getPullRequests = async (repo, maxRequestAmount, aggregateSize, tok
     // https://stackoverflow.com/questions/53948280/how-to-throttle-promise-all-to-5-promises-per-second
     async function doBlock(startIndex) {
         // Shallow-copy a block of promises to work on
-        const currBlock = list_items.slice(startIndex, startIndex + 10);
+        const currBlock = list_items.slice(startIndex, startIndex + maxRequestAmount);
         // Await the completion. If any fail, it will throw and that's good.
         const blockResults = await Promise.all(
             list_items.map(async (element) => {
@@ -145,7 +145,7 @@ export const getPullRequests = async (repo, maxRequestAmount, aggregateSize, tok
         }
     }
 
-    for (let iBlock = 0; iBlock < list_items.length; iBlock += 10) {
+    for (let iBlock = 0; iBlock < list_items.length; iBlock += maxRequestAmount) {
         await doBlock(iBlock);
     }
 
