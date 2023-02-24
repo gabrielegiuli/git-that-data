@@ -120,19 +120,36 @@ function getIssuesPage(repo, token, page) {
 }
 
 export const getPullRequests = async (repo, maxRequestAmount, aggregateSize, token) => {
-    
+
     if (!aggregateSize) {
         return structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
     }
 
-    const array = await structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
-    const out_array = await Promise.all(
-        array.map(async (element) => {
-            element.size = await getPullRequestSize(repo, token, element.number)
-            return element
-        })
-    )
-    return out_array
+    const list_items = await structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
+    const results = new Array(list_items.length)
+
+    // https://stackoverflow.com/questions/53948280/how-to-throttle-promise-all-to-5-promises-per-second
+    async function doBlock(startIndex) {
+        // Shallow-copy a block of promises to work on
+        const currBlock = list_items.slice(startIndex, startIndex + 10);
+        // Await the completion. If any fail, it will throw and that's good.
+        const blockResults = await Promise.all(
+            list_items.map(async (element) => {
+                element.size = await getPullRequestSize(repo, token, element.number)
+                return element
+            })
+        )
+        // Assuming all succeeded, copy the results into the results array
+        for (let ix = 0; ix < blockResults.length; ix++) {
+            results[ix + startIndex] = blockResults[ix];
+        }
+    }
+
+    for (let iBlock = 0; iBlock < list_items.length; iBlock += 10) {
+        await doBlock(iBlock);
+    }
+
+    return results
 }
 
 export const getCommits = async (repo, maxRequestAmount, token) => structuredRequest(repo, maxRequestAmount, token, getCommitsPage)
