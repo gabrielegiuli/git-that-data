@@ -1,6 +1,7 @@
 import { ComposedChart, Bar, Legend, XAxis, YAxis, Tooltip, Line } from 'recharts';
 import { groupBy, getPosition } from '../other/utils';
 import { CircularProgress } from '@mui/material';
+import Box from '@mui/material/Box';
 
 function processData(data, authEmails) {
   const processed_commits = []

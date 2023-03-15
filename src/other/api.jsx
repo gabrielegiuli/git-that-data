@@ -126,6 +126,7 @@ export const getPullRequests = async (repo, maxRequestAmount, aggregateSize, tok
     }
 
     const list_items = await structuredRequest(repo, maxRequestAmount, token, getPullRequestsPage)
+    console.log(list_items.length)
     const results = new Array(list_items.length)
 
     // https://stackoverflow.com/questions/53948280/how-to-throttle-promise-all-to-5-promises-per-second
