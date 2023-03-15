@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import html2canvas from 'html2canvas';
+import { useState, useEffect } from 'react'
 import { removeDuplicates } from './other/utils';
 import { getCommits, getIssues, getPullRequests } from './other/api';
 import CommitsGraph from './components/commits_graph';
 import IssuesGraph from './components/issues_graph';
 import EmailTable from './components/table';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import Button from '@mui/material/Button';
 import './App.css'
 import PRGraph from './components/pr_graph';
 
@@ -34,8 +32,6 @@ export default function App() {
   const [isPRLoading, setIsPRLoading] = useState(true)
   const [isIssuesLoading, setIsIssuesLoading] = useState(true)
   const [isCommitsLoading, setIsCommitsLoading] = useState(true)
-
-  const printRef = useRef()
 
   useEffect(() => { setIsTableLoading(false) }, [list])
   useEffect(() => { setIsPRLoading(false) }, [pullRequests])
@@ -98,26 +94,6 @@ export default function App() {
       .catch(error => alert("An error has occurred, please check the name and try again"))
   }
 
-  // https://www.robinwieruch.de/react-component-to-image/
-  const downloadPlots = async () => {
-    const element = printRef.current
-    const canvas = await html2canvas(element)
-
-    const data = canvas.toDataURL('image/jpg')
-    const link = document.createElement('a')
-
-    if (typeof link.download === 'string') {
-      link.href = data
-      link.download = 'image.jpg'
-
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } else {
-      window.open(data)
-    }
-  }
-
   if (isBlank) {
     return (
       <ThemeProvider theme={darkTheme}>
@@ -161,12 +137,11 @@ export default function App() {
               </label>
             </div>
           </div>
-          <div className='recharts-container' ref={printRef}>
+          <div className='recharts-container'>
             <PRGraph data={pullRequests} loading={isPRLoading} isAggregated={recordSize} />
             <IssuesGraph data={issues} loading={isIssuesLoading} />
             <CommitsGraph data={commits} authEmails={authEmails} loading={isCommitsLoading} />
           </div>
-          <Button variant="outlined" onClick={downloadPlots}>Export Plots</Button>
           <EmailTable list={list} handle={updateSelected} loading={isTableLoading} />
         </div>
       </ThemeProvider>
