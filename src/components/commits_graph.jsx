@@ -127,7 +127,7 @@ function Toolbar({ printRef }) {
   return (
     <div className='toolbar'>
       <Box>
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           Commits
         </Typography>
         <Button variant="outlined" onClick={() => { downloadPlots() }}>Export Plot</Button>

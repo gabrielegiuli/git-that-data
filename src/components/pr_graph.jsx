@@ -2,6 +2,12 @@ import { ComposedChart, Bar, Legend, XAxis, YAxis, Tooltip, Line } from 'rechart
 import { groupBy, getPosition } from '../other/utils';
 import { CircularProgress } from '@mui/material';
 
+import { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+
 function processData(data) {
     const processed_prs = []
     for (var pr of data) {
@@ -74,7 +80,7 @@ function Graph({ data, isAggregated, enableTooltip }) {
                 <Bar type="monotone" dataKey="XL" barSize={30} fill="#ffc658" yAxisId="left" stackId="a" />
                 <Bar type="monotone" dataKey="XXL" barSize={30} fill="#5F9EA0" yAxisId="left" stackId="a" />
                 <Line type="monotone" dataKey="Total" yAxisId="right" />
-                { enableTooltip && 
+                {enableTooltip &&
                     <Tooltip />
                 }
                 <Legend />
@@ -88,7 +94,7 @@ function Graph({ data, isAggregated, enableTooltip }) {
                 <YAxis yAxisId="right" orientation="right" />
                 <Bar type="monotone" dataKey="Count" barSize={30} fill="#8884d8" yAxisId="left" stackId="a" />
                 <Line type="monotone" dataKey="Total" yAxisId="right" />
-                { enableTooltip && 
+                {enableTooltip &&
                     <Tooltip />
                 }
                 <Legend />
@@ -98,12 +104,15 @@ function Graph({ data, isAggregated, enableTooltip }) {
 }
 
 export default function PRGraph({ data, loading, isAggregated }) {
+    
     const cumulative = processData(data)
+    const printRef = useRef()
+
     if (loading) {
         return (
             <div className='outer'>
                 <div className='blurr below'>
-                    <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading}/>
+                    <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading} />
                 </div>
                 <div className='top'>
                     <CircularProgress size="7rem" />
@@ -113,7 +122,46 @@ export default function PRGraph({ data, loading, isAggregated }) {
         )
     } else {
         return (
-            <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading}/>
+            <div>
+                <Toolbar printRef={printRef}/>
+                <div ref={printRef}>
+                    <Graph data={cumulative} isAggregated={isAggregated} enableTooltip={!loading} />
+                </div>
+            </div>
         )
     }
+}
+
+function Toolbar({ printRef }) {
+
+    // https://www.robinwieruch.de/react-component-to-image/
+    const downloadPlots = async () => {
+        const element = printRef.current
+        const canvas = await html2canvas(element)
+
+        const data = canvas.toDataURL('image/jpg')
+        const link = document.createElement('a')
+
+        if (typeof link.download === 'string') {
+            link.href = data
+            link.download = 'image.jpg'
+
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        } else {
+            window.open(data)
+        }
+    }
+
+    return (
+        <div className='toolbar'>
+            <Box>
+                <Typography variant="h6" gutterBottom>
+                    Pull Requests
+                </Typography>
+                <Button variant="outlined" onClick={() => { downloadPlots() }}>Export Plot</Button>
+            </Box>
+        </div>
+    )
 }
